@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BMR, TDEE, and Body Fat Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 400px;
+            margin: auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px; /* Add space between containers */
+        }
+        h1 {
+            text-align: center;
+            color: #5b5b5b;
+        }
+        label {
+            display: block;
+            margin: 15px 0 5px;
+        }
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+        button {
+            background-color: #5baf5b;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 10px;
+            cursor: pointer;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #4cae4c;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 10px;
+            background: #e2f0d9;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>BMR and TDEE Calculator</h1>
+        <form id="bmrForm">
+            <label for="weight">Weight (kg):</label>
+            <input type="number" id="weight" required>
+
+            <label for="height">Height (cm):</label>
+            <input type="number" id="height" required>
+
+            <label for="age">Age (years):</label>
+            <input type="number" id="age" required>
+
+            <label for="gender">Gender:</label>
+            <select id="gender" required>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+            </select>
+
+            <label for="activityLevel">Activity Level:</label>
+            <select id="activityLevel" required>
+                <option value="1.2">Sedentary (little or no exercise)</option>
+                <option value="1.375">Lightly active (light exercise/sports 1-3 days/week)</option>
+                <option value="1.55">Moderately active (moderate exercise/sports 3-5 days/week)</option>
+                <option value="1.725">Very active (hard exercise/sports 6-7 days a week)</option>
+                <option value="1.9">Super active (very hard exercise/sports and a physical job)</option>
+            </select>
+
+            <button type="button" onclick="calculateBMR()">Calculate BMR and TDEE</button>
+            <div id="bmrResult" class="result" style="display: none;"></div>
+        </form>
+    </div>
+
+    <div class="container">
+        <h1>Body Fat Percentage Calculator</h1>
+        <form id="bodyFatForm">
+            <label for="waist">Waist (cm):</label>
+            <input type="number" id="waist" required>
+
+            <label for="neck">Neck (cm):</label>
+            <input type="number" id="neck" required>
+
+            <label for="heightBF">Height (cm):</label>
+            <input type="number" id="heightBF" required>
+
+            <div id="hipContainer" style="display: none;">
+                <label for="hip">Hip (cm):</label>
+                <input type="number" id="hip">
+            </div>
+
+            <label for="genderBF">Gender:</label>
+            <select id="genderBF" onchange="toggleHipField()" required>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+            </select>
+
+            <button type="button" onclick="calculateBodyFat()">Calculate Body Fat</button>
+            <div id="bodyFatResult" class="result" style="display: none;"></div>
+        </form>
+    </div>
+
+    <script>
+        function calculateBMR() {
+            const weight = parseFloat(document.getElementById('weight').value);
+            const height = parseFloat(document.getElementById('height').value);
+            const age = parseFloat(document.getElementById('age').value);
+            const gender = document.getElementById('gender').value;
+            const activityLevel = parseFloat(document.getElementById('activityLevel').value);
+
+            let BMR;
+            if (gender === 'male') {
+                BMR = 88.362 + (13.397 * weight) + (4.799 * height) - (5.677 * age);
+            } else {
+                BMR = 447.593 + (9.247 * weight) + (3.098 * height) - (4.330 * age);
+            }
+
+            const TDEE = BMR * activityLevel;
+
+            document.getElementById('bmrResult').style.display = 'block';
+            document.getElementById('bmrResult').innerHTML = `<strong>BMR:</strong> ${BMR.toFixed(2)} kcal<br><strong>TDEE:</strong> ${TDEE.toFixed(2)} kcal`;
+        }
+
+        function toggleHipField() {
+            const gender = document.getElementById('genderBF').value;
+            const hipContainer = document.getElementById('hipContainer');
+            if (gender === 'female') {
+                hipContainer.style.display = 'block';
+            } else {
+                hipContainer.style.display = 'none';
+            }
+        }
+
+        function calculateBodyFat() {
+            const waist = parseFloat(document.getElementById('waist').value);
+            const neck = parseFloat(document.getElementById('neck').value);
+            const height = parseFloat(document.getElementById('heightBF').value);
+            const gender = document.getElementById('genderBF').value;
+            let hip = 0;
+
+            if (gender === 'female') {
+                hip = parseFloat(document.getElementById('hip').value);
+            }
+
+            let bodyFatPercentage;
+            if (gender === 'male') {
+                bodyFatPercentage = 86.01 * Math.log10(waist - neck) - 70.041 * Math.log10(height) + 36.76;
+            } else {
+                bodyFatPercentage = 163.205 * Math.log10(waist + hip - neck) - 97.684 * Math.log10(height) - 78.387;
+            }
+
+            document.getElementById('bodyFatResult').style.display = 'block';
+            document.getElementById('bodyFatResult').innerHTML = `<strong>Body Fat Percentage:</strong> ${bodyFatPercentage.toFixed(2)}%`;
+        }
+    </script>
+</body>
+</html>
